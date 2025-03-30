@@ -22,9 +22,6 @@ import com.example.htttdl.repository.OrderRepository;
 public class PhanCongService {
 
     @Autowired
-    OrderService orderService;
-
-    @Autowired
     OrderRepository orderRepo;
 
     AminBean a = new AminBean(1);
@@ -64,7 +61,6 @@ public class PhanCongService {
 
         Map<String, PhanCongDTO> assignmentMap = new HashMap<>();
 
-        // Danh sách cụm đơn hàng chưa được gán
         List<Map.Entry<String, List<DonHang>>> unassignedClusters = new ArrayList<>(clusteredOrders.entrySet());
         System.out.println("=================================================================");
         System.out.println("SO CUM CAN GAN LA: " + unassignedClusters.size());
@@ -77,14 +73,12 @@ public class PhanCongService {
                 List<DonHang> orders = entry.getValue();
 
                 if (availableShippers.isEmpty()) {
-                    remainingClusters.add(entry); // Nếu hết shipper, cụm này sẽ chờ vòng lặp tiếp theo
+                    remainingClusters.add(entry); 
                     continue;
                 }
 
-                // Tính trung tâm cụm
                 double[] center = tinhTrungTamCum(orders);
 
-                // Tìm shipper gần nhất
                 NHANVIEN nearestShipper = null;
                 double minDistance = Double.MAX_VALUE;
 
@@ -110,14 +104,12 @@ public class PhanCongService {
                     a++;
                     availableShippers.remove(nearestShipper);
                 } else {
-                    remainingClusters.add(entry); // Nếu không tìm thấy shipper, giữ lại cụm này
+                    remainingClusters.add(entry); 
                 }
             }
 
-            // Cập nhật danh sách cụm chưa được gán
             unassignedClusters = remainingClusters;
 
-            // Nếu sau một vòng lặp mà không có cụm nào được gán => dừng
             if (a >= b) {
                 break;
             }
@@ -136,11 +128,8 @@ public class PhanCongService {
             points.add(point);
         }
 
-        // Thực hiện DBSCAN clustering
         DBSCANClusterer<DoublePoint> dbscan = new DBSCANClusterer<>(eps, minPts);
         List<Cluster<DoublePoint>> clusters = dbscan.cluster(points);
-
-        // Chuyển kết quả sang Map<String, List<DonHang>>
         Map<String, List<DonHang>> clusteredOrders = new HashMap<>();
         int clusterIndex = 1;
 
@@ -167,12 +156,9 @@ public class PhanCongService {
             pointToDonHangs.computeIfAbsent(point, k -> new ArrayList<>()).add(donHang);
             points.add(point);
         }
-
-        // Thực hiện DBSCAN clustering
         DBSCANClusterer<DoublePoint> dbscan = new DBSCANClusterer<>(eps, minPts);
         List<Cluster<DoublePoint>> clusters = dbscan.cluster(points);
 
-        // Chuyển kết quả sang Map<String, List<DonHang>>
         Map<String, List<DonHang>> clusteredOrders = new HashMap<>();
         int clusterIndex = 1;
 
@@ -190,9 +176,6 @@ public class PhanCongService {
         return clusteredOrders;
     }
 
-    /**
-     * Cân bằng số cụm để phân phối đơn hàng đều hơn cho shipper
-     */
     public static Map<String, List<DonHang>> balanceClusters(Map<String, List<DonHang>> clusters, int numShippers,
             Integer orderSize) {
         if (orderSize < numShippers) {
@@ -203,23 +186,18 @@ public class PhanCongService {
         int avgOrdersPerShipper = totalOrders / numShippers;
         int numClusters = clusterList.size();
         while (numClusters < numShippers) {
-            // Tìm cụm lớn nhất
             clusterList.sort((a, b) -> b.size() - a.size());
             List<DonHang> largestCluster = clusterList.get(0);
-            // Chỉ tách nếu cụm lớn hơn gấp đôi số đơn trung bình
             if (largestCluster.size() < avgOrdersPerShipper * 2)
                 break;
-            // Chia cụm lớn nhất thành 2 cụm nhỏ hơn
             int splitSize = largestCluster.size() / 2;
             List<DonHang> newCluster1 = new ArrayList<>(largestCluster.subList(0, splitSize));
             List<DonHang> newCluster2 = new ArrayList<>(largestCluster.subList(splitSize, largestCluster.size()));
 
-            // Cập nhật danh sách cụm
             clusterList.set(0, newCluster1);
             clusterList.add(newCluster2);
             numClusters++;
         }
-        // Đưa danh sách cụm vào Map
         Map<String, List<DonHang>> balancedClusters = new HashMap<>();
         for (int i = 0; i < clusterList.size(); i++) {
             balancedClusters.put("cum" + (i + 1), clusterList.get(i));
@@ -227,7 +205,6 @@ public class PhanCongService {
         return balancedClusters;
     }
 
-    // Tính trung tâm cụm dựa trên trung bình tọa độ
     private static double[] tinhTrungTamCum(List<DonHang> orders) {
         double sumLat = 0, sumLon = 0;
         for (DonHang order : orders) {
@@ -237,9 +214,8 @@ public class PhanCongService {
         return new double[] { sumLon / orders.size(), sumLat / orders.size() };
     }
 
-    // Hàm tính khoảng cách giữa hai tọa độ theo Haversine
     private static double haversine(double lat1, double lon1, double lat2, double lon2) {
-        final int R = 6371; // Bán kính trái đất (km)
+        final int R = 6371; 
         double dLat = Math.toRadians(lat2 - lat1);
         double dLon = Math.toRadians(lon2 - lon1);
         double a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
@@ -248,5 +224,6 @@ public class PhanCongService {
         double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
         return R * c;
     }
+    
 
 }

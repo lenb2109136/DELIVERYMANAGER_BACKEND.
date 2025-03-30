@@ -21,4 +21,10 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<Object>(new ObjectRespone(firstError.getDefaultMessage(), null),
                 HttpStatus.BAD_REQUEST);
     }
+    @ExceptionHandler(value=Exception.class)
+	public ResponseEntity<Object> exception(Exception e) {
+		return new ResponseEntity<Object>(new ObjectRespone(e.getMessage(), null),
+                HttpStatus.BAD_REQUEST);
+	}
+	
 }
