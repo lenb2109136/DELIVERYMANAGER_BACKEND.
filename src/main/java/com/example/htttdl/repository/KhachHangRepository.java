@@ -14,7 +14,7 @@ public interface KhachHangRepository extends JpaRepository<KhachHang, Integer> {
     @Query("select p from KhachHang p where p.sdt=:sdt ")
     public Optional<KhachHang> getKhachHangById(@Param("sdt") String sdt);
 
-    @Query("select p from KhachHang p where p.sdt=:sdt and p.matKhau=:password ")
+    @Query("select p from KhachHang p where p.sdt like :sdt and p.matKhau like :password")
     public Optional<KhachHang> getKhachHangBySdtAndPassword(@Param("sdt") String sdt,
             @Param("password") String password);
 }

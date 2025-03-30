@@ -90,7 +90,7 @@ public class SecurityFilterChainConfig {
                         AuthenticationManager authenticationManager)
                         throws Exception {
                 http.securityMatcher("/customer/**")
-                                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                			.cors(cors -> cors.configurationSource(corsConfigurationSource()))
                                 .csrf(csrf -> csrf.disable())
                                 .authorizeHttpRequests(auth -> auth
                                                 .requestMatchers("/admin/login").permitAll()

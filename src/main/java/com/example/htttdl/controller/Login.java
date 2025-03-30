@@ -49,8 +49,10 @@ public class Login {
     @PostMapping("/login/customer")
     public ResponseEntity<Object> loginCustomer(@RequestBody LoginData loginRequest) {
         if (loginRequest.getSdt() != null || loginRequest.getPassword() != null) {
+        	System.out.println(loginRequest.getSdt());
             KhachHang nhanVien = authService.getKhachHangBySdtAndPassword(loginRequest.getSdt(),
                     loginRequest.getPassword());
+            System.out.println(nhanVien!=null);
             if (nhanVien != null) {
                 String token = tokenUtil.generateToken(nhanVien.getSdt());
                 LoginResponse lr = new LoginResponse(token, "CUSTOMER", nhanVien);
